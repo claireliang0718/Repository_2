@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="format-detection" content="telephone=no">
+	
+<title>登录</title>
+<style>
+
+ 
+h1{
+    position:left;
+    font-family: "微软雅黑";
+    font-size: 25px;
+}
+
+div{
+  position: relative;
+  text-align: center;
+}
+
+a{
+    font-family: "微软雅黑"
+    text-decoration: none
+    color: #3ad0c6
+}
+
+.login-border{
+	width: 80%;
+	height: 40px;
+	margin-top: 40px;
+	margin-left: 10%;
+	line-height: 40px;
+	text-align: center;
+	background-color: #efefef;
+	border-radius: 25px;
+}
+
+div input{
+	width: 70%;
+	float: left;
+	margin-left: 5%;
+	height: 37px;
+	line-height: 37px;
+	border:0px;
+	color: #333333;
+	font-size: 16px;
+	background-color: #efefef;
+	font-family: "微软雅黑";
+	
+}
+
+#sendButton{
+    font-size: 12px;
+	font-family: "微软雅黑";
+	border:none;
+}
+
+#loginButton{
+	height: 40px;
+	width: 100%;
+	margin-top: 2px;
+	font-size: 12px;
+	font-family: "微软雅黑";
+	font-weight: bold;
+	line-height: 38px;
+	color: #ffffff;
+	background-color: #3ad0c6;
+	border-radius: 25px;
+
+}
+
+#checkbox{
+    font-family: "微软雅黑";
+	float: left;
+}
+
+</style>
+</head>
+
+<body>
+    <h1>询宝孕育</h1>
+        
+    <div class="login-border">
+    <input  type="text" placeholder="请输入手机号码" id="phoneNumber" required="" maxlength="11"></input>
+    </div>
+    
+    <div class="login-border">
+ 
+    <input  type="text" placeholder="短信验证码" id="verificationCode" required=""></input> </td>
+    
+    <labal for=verificationCode>
+    <button id="sendButton" onclick="sendCode(this)"> 发送 </button>
+
+    
+    <div id="checkbox">
+        <input type="checkbox" name= checkbox value="agree"/>勾选即代表同意 
+        <a href="#">《淘宝用户服务协议》</a>
+        
+        <button id="loginButton">登录</button>
+  </div>
+
+
+
+    <script type="text/javascript">
+    
+    //检查手机号
+    function checkMobile(){ 
+    var _phone = $("#phone").val();
+    if(!(/^1[3|4|5|8][0-9]\d{8}$/.test(_phone))){ 
+        alert("请输入正确的手机号"); 
+        return false; 
+    } 
+    
+    //发送短信验证码
+    
+    function sendCode(obj){
+        var mobileReg = /^1[3|4|5|6|7|8|9][0-9]\d{8}$/
+        var countdown = 60, timerTag;
+        var mobile=$("#mobile").val().trim();
+        if(mobile != ""){
+            var mobileResult = mobileReg.test(mobile);
+            if(mobileResult){
+                $.ajax({
+                    url: "verifyCode",
+                    type: "post",
+                    dataType: "json",
+                    async:false,
+                    data: {mobile:mobile},
+                    beforeSend: function (){
+                        $("#sendSms").attr("disabled","disabled");
+                        $(obj).css("background-color","#999");
+                    },
+                    success: function (data) {
+                        if(data.result=="success"){
+                            alert("验证码发送成功，请注意查收！")
+                            setTime(obj,countdown,timerTag);
+                        }else{
+                            countdown = -1;
+                        }
+                    },
+                    complete: function () {
+                        $("#sendSms").removeAttr("disabled");
+                    },
+                });
+            }else{
+                alert("请输入正确的手机号！");
+            }
+        }else{
+            alert("手机号不能为空，请重新输入");
+        }
+    }
+    
+    //短信验证码计数
+   
+    function setTime(obj,countdown,timerTag) {
+        if (countdown <= 0) {
+            $(obj).removeAttr("disabled").css("background-color","rgb(24, 197, 133)");
+            $("#sendSms").attr("onclick","sendCode(this)");
+//            $(obj).html("重新发送");
+            $("#sendSms").val("点击重新获取验证码").removeAttr("disabled").removeClass(
+                "disabled");
+            countdown = 60;
+            clearTimeout(timerTag);
+        } else {
+            $("#sendSms").attr("disabled", true);//点击了"发送"按钮后，点击失效。
+            $("#sendSms").addClass("disabled");//置灰
+//            $(obj).html("重新发送(" + countdown + ")");
+            $("#sendSms").attr("value","" + countdown + "秒后重新获取验证码");
+            countdown--;
+            timerTag = setTimeout(function() {
+                setTime(obj,countdown,timerTag);
+            }, 1000);
+        }
+    }
+
+    </script>
+</body>
+</html>
